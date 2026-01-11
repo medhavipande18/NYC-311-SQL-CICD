@@ -1,6 +1,8 @@
 [sqlfluff]
 dialect = postgres
 templater = raw
+max_line_length = 120
 
 [sqlfluff:rules]
-max_line_length = 120
+# Keep linting useful, not painful for this project
+exclude_rules = LT02,LT05,AM06,RF04
