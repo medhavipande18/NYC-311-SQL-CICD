@@ -25,6 +25,7 @@ This project addresses that risk by enforcing **automated validation of analytic
 ## Dataset
 **NYC 311 Service Requests (2010–Present)**  
 https://www.kaggle.com/datasets/pablomonleon/311-service-requests-nyc
+
 A small, representative **CSV sample** is committed for CI execution.  
 The full dataset remains local-only and is not tracked in Git.
 
@@ -98,5 +99,6 @@ python scripts/make_sample_csv.py
 - ✅ SQL validated against real database
 - ✅ Ready for production-style analytics workflows
 ---
+
 
 
