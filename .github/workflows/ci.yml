@@ -1,0 +1,74 @@
+name: CI - SQL Lint + Postgres Checks
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: nyc311
+          POSTGRES_USER: nyc311_user
+          POSTGRES_PASSWORD: nyc311_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U nyc311_user -d nyc311"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install SQLFluff
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint SQL (SQLFluff)
+        run: |
+          sqlfluff lint sql --dialect postgres
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U nyc311_user -d nyc311 && exit 0
+            sleep 2
+          done
+          echo "Postgres did not become ready in time" && exit 1
+        env:
+          PGPASSWORD: nyc311_pass
+
+      - name: Copy sample CSV into runner temp
+        run: |
+          cp data/sample/nyc_311_sample.csv /tmp/nyc_311_sample.csv
+          ls -lh /tmp/nyc_311_sample.csv
+
+      - name: Apply schema, load data, create views, run smoke tests
+        run: |
+          psql -h localhost -p 5432 -U nyc311_user -d nyc311 -f sql/00_schema.sql
+          psql -h localhost -p 5432 -U nyc311_user -d nyc311 -f sql/01_load.sql
+          psql -h localhost -p 5432 -U nyc311_user -d nyc311 -f sql/02_views.sql
+          psql -h localhost -p 5432 -U nyc311_user -d nyc311 -f sql/03_smoke_tests.sql
+        env:
+          PGPASSWORD: nyc311_pass
+
+      - name: Print quick outputs
+        run: |
+          psql -h localhost -p 5432 -U nyc311_user -d nyc311 -c "SELECT COUNT(*) AS total_rows FROM nyc_311_requests;"
+          psql -h localhost -p 5432 -U nyc311_user -d nyc311 -c "SELECT * FROM vw_daily_request_volume LIMIT 5;"
+        env:
+          PGPASSWORD: nyc311_pass
