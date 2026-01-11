@@ -40,7 +40,7 @@ jobs:
 
       - name: Lint SQL (SQLFluff)
         run: |
-          sqlfluff lint sql --dialect postgres
+          sqlfluff lint sql --config .sqlfluff
 
       - name: Wait for Postgres
         run: |
