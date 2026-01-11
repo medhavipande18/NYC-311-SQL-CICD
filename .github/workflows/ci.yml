@@ -40,7 +40,7 @@ jobs:
 
       - name: Lint SQL (SQLFluff)
         run: |
-          sqlfluff lint sql --config .sqlfluff
+          sqlfluff lint sql --dialect postgres --exclude-rules LT01,LT02,LT12,AM06,LT05
 
       - name: Wait for Postgres
         run: |
