@@ -93,7 +93,8 @@ python scripts/make_sample_csv.py
 ---
 
 ## Status
-✅ CI/CD pipeline operational
-✅ SQL validated against real database
-✅ Ready for production-style analytics workflows
+- ✅ CI/CD pipeline operational
+- ✅ SQL validated against real database
+- ✅ Ready for production-style analytics workflows
 ---
+
